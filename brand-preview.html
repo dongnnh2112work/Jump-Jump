@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Characters — Howl Jump Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a14;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 60px;
+    }
+
+    h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(28px, 5vw, 48px);
+      text-align: center;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #c8ff00, #00e5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    /* ── Section Labels ── */
+    .section-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    /* ── Character Cards ── */
+    .cards {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .card {
+      width: 280px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .card:hover { transform: translateY(-6px); }
+    .card.nike { border-color: rgba(255,255,255,0.3); }
+    .card.cocacola { border-color: rgba(204,0,0,0.5); }
+
+    /* ── Brand header stripe ── */
+    .card-brand {
+      height: 6px;
+    }
+    .nike .card-brand { background: #FFFFFF; }
+    .cocacola .card-brand { background: #CC0000; }
+
+    /* ── Canvas stage — dark neutral ── */
+    .stage {
+      background: #141420;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 20px 0 0;
+      gap: 20px;
+    }
+
+    .stage-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stage-slot canvas {
+      display: block;
+      image-rendering: pixelated;
+    }
+    .stage-slot .pose-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Card info ── */
+    .card-info {
+      padding: 20px 20px 24px;
+    }
+    .brand-name {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.45;
+      margin-bottom: 4px;
+    }
+    .char-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .nike .char-name { color: #FFFFFF; }
+    .cocacola .char-name { color: #FF4444; }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+    }
+    .badge.highlight {
+      border-color: transparent;
+    }
+    .nike .badge.highlight { background: rgba(255,255,255,0.15); color: #fff; }
+    .cocacola .badge.highlight { background: rgba(204,0,0,0.3); color: #ff8888; }
+
+    .desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 1px;
+      height: 60px;
+      background: rgba(255,255,255,0.06);
+      margin: 0 auto 48px;
+    }
+
+    /* ── Existing characters row ── */
+    .existing-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .existing-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+    .existing-slot canvas { display: block; }
+    .existing-slot .ename {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+
+<h1>Brand Characters</h1>
+<p class="subtitle">Howl Jump · Brand Skin Preview · Demo Build</p>
+
+<p class="section-label">Phase 1 Preview — Nike · Coca-Cola</p>
+
+<div class="cards">
+
+  <!-- NIKE -->
+  <div class="card nike">
+    <div class="card-brand"></div>
+    <div class="stage">
+      <div class="stage-slot">
+        <canvas id="nikeIdle" width="120" height="130"></canvas>
+        <div class="pose-label">Idle</div>
+      </div>
+      <div class="stage-slot">
+        <canvas id="nikeJump" width="120" height="130"></canvas>
+        <div class="pose-label">Jump</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="brand-name">Nike</div>
+      <div class="char-name">AIR</div>
+      <div class="badges">
+        <span class="badge highlight">Sport</span>
+        <span class="badge">Voxel</span>
+        <span class="badge">Swoosh</span>
+      </div>
+      <p class="desc">
+        Energetic athlete in black Nike tracksuit with iconic white Swoosh on the chest.
+        Idle animation: right-arm pump with speed lines at peak.
+        Jump: wide star pose with arms spread.
+      </p>
+    </div>
+  </div>
+
+  <!-- COCA-COLA -->
+  <div class="card cocacola">
+    <div class="card-brand"></div>
+    <div class="stage">
+      <div class="stage-slot">
+        <canvas id="colaIdle" width="120" height="130"></canvas>
+        <div class="pose-label">Idle</div>
+      </div>
+      <div class="stage-slot">
+        <canvas id="colaJump" width="120" height="130"></canvas>
+        <div class="pose-label">Jump</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="brand-name">Coca-Cola</div>
+      <div class="char-name">FIZZY</div>
+      <div class="badges">
+        <span class="badge highlight">Fizzy</span>
+        <span class="badge">Voxel</span>
+        <span class="badge">Contour Wave</span>
+      </div>
+      <p class="desc">
+        Cheerful character in classic red Coca-Cola uniform with white contour wave logo.
+        Idle animation: gentle sway with rising bubbles.
+        Jump: arms shoot up with fizz burst effect.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+<p class="section-label">Existing Roster</p>
+<div class="existing-row" id="existingRow"></div>
+
+<script type="module">
+import { drawVoxelCharacter, CHARACTER_ROSTER } from "./js/character.js";
+
+const EXISTING = ["boy", "girl", "robot", "ninja", "astronaut"];
+
+// ── Animated canvases ─────────────────────────────────────────────────────────
+let frame = 0;
+
+const animations = [
+  { canvasId: "nikeIdle", charId: "nike", state: "IDLE" },
+  { canvasId: "nikeJump", charId: "nike", state: "JUMP" },
+  { canvasId: "colaIdle", charId: "cocacola", state: "IDLE" },
+  { canvasId: "colaJump", charId: "cocacola", state: "JUMP" },
+];
+
+function tick() {
+  frame += 1;
+
+  for (const { canvasId, charId, state } of animations) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) continue;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawVoxelCharacter(ctx, canvas.width / 2, canvas.height - 12, state, frame, charId);
+  }
+
+  // Existing roster (idle only)
+  for (const id of EXISTING) {
+    const canvas = document.getElementById(`exist_${id}`);
+    if (!canvas) continue;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawVoxelCharacter(ctx, canvas.width / 2, canvas.height - 8, "IDLE", frame, id);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ── Build existing roster row ────────────────────────────────────────────────
+const row = document.getElementById("existingRow");
+for (const id of EXISTING) {
+  const C = CHARACTER_ROSTER[id];
+  const slot = document.createElement("div");
+  slot.className = "existing-slot";
+  slot.innerHTML = `
+    <canvas id="exist_${id}" width="80" height="100"></canvas>
+    <div class="ename">${C.name}</div>
+  `;
+  row.appendChild(slot);
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

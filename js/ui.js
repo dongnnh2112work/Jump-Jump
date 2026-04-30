@@ -191,9 +191,14 @@ export function createUI() {
     overlay.style.display = "grid";
     overlay.style.placeItems = "center";
     overlay.innerHTML = `
-      <div style="width:min(860px,96vw);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,.35);background:rgba(10,10,20,.72)">
-        <div style="font-family:'Fredoka One',cursive;font-size:30px;text-align:center">Choose Character</div>
-        <div id="charGrid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0"></div>
+      <div style="width:min(860px,96vw);padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,.35);background:rgba(10,10,20,.82);backdrop-filter:blur(12px)">
+        <div style="font-family:'Fredoka One',cursive;font-size:30px;text-align:center;margin-bottom:14px">Choose Character</div>
+        <div id="charGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:12px"></div>
+        <div id="charDescPanel" style="min-height:58px;padding:11px 15px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);margin-bottom:14px;transition:opacity .15s ease">
+          <div id="charDescName" style="font:700 13px Nunito,sans-serif;color:#c8ff00;margin-bottom:4px"></div>
+          <div id="charDescTag"  style="display:inline-block;font:700 10px Nunito,sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.55);margin-bottom:6px"></div>
+          <div id="charDescText" style="font:400 13px Nunito,sans-serif;color:rgba(255,255,255,.55);line-height:1.55"></div>
+        </div>
         <div style="display:flex;justify-content:center;gap:10px">
           <button id="charPlayBtn" class="ghost-btn" type="button">PLAY</button>
         </div>
@@ -209,7 +214,12 @@ export function createUI() {
       slot.style.borderRadius = "12px";
       slot.style.padding = "8px";
       slot.style.cursor = "pointer";
-      slot.innerHTML = `<canvas width="80" height="100" style="display:block;margin:0 auto"></canvas><div style="font:700 12px Nunito;text-align:center;margin-top:6px">${CHARACTER_ROSTER[id].name}</div>`;
+      const C = CHARACTER_ROSTER[id];
+      slot.innerHTML = `
+        <canvas width="80" height="100" style="display:block;margin:0 auto"></canvas>
+        <div style="font:700 13px Nunito,sans-serif;text-align:center;margin-top:6px">${C.name}</div>
+        <div style="font:700 10px Nunito,sans-serif;text-align:center;color:rgba(255,255,255,.35);letter-spacing:1px;margin-top:2px">${C.tag}</div>
+      `;
       slot.addEventListener("click", () => {
         selected = id;
         paintSelection();
@@ -218,11 +228,29 @@ export function createUI() {
       slotMap.set(id, slot);
     }
 
+    const descName = overlay.querySelector("#charDescName");
+    const descTag  = overlay.querySelector("#charDescTag");
+    const descText = overlay.querySelector("#charDescText");
+
+    const updateDesc = (id) => {
+      const C = CHARACTER_ROSTER[id];
+      descName.textContent = C.name;
+      descTag.textContent  = C.tag;
+      descText.textContent = C.desc || "";
+      // Brand-specific accent colour for name
+      if (C.isNike)       descName.style.color = "#FFFFFF";
+      else if (C.isCocaCola) descName.style.color = "#FF6666";
+      else                descName.style.color = "#c8ff00";
+    };
+
     const paintSelection = () => {
       for (const [id, slot] of slotMap) {
-        slot.style.borderColor = id === selected ? "#c8ff00" : "rgba(255,255,255,.2)";
-        slot.style.transform = id === selected ? "scale(1.05)" : "scale(1)";
+        const isSelected = id === selected;
+        slot.style.borderColor = isSelected ? "#c8ff00" : "rgba(255,255,255,.2)";
+        slot.style.background  = isSelected ? "rgba(200,255,0,.08)" : "rgba(255,255,255,.08)";
+        slot.style.transform   = isSelected ? "scale(1.05)" : "scale(1)";
       }
+      updateDesc(selected);
     };
     paintSelection();
 
@@ -250,10 +278,10 @@ export function createUI() {
     };
     const onKey = (e) => {
       const idx = ids.indexOf(selected);
-      if (e.key === "ArrowLeft") {
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         selected = ids[(idx - 1 + ids.length) % ids.length];
         paintSelection();
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         selected = ids[(idx + 1) % ids.length];
         paintSelection();
       } else if (e.key === "Enter") {
