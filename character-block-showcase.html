@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Howl Jump — Character & Block Showcase</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: linear-gradient(180deg, #4FC8E8 0%, #A8E6F0 100%);
+  min-height: 100vh;
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Clouds background */
+.cloud-bg { position:fixed; inset:0; pointer-events:none; z-index:0; }
+
+h1 {
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 36px;
+  color: white;
+  text-align: center;
+  padding: 32px 0 8px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  position: relative; z-index:1;
+}
+.subtitle {
+  text-align:center;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 32px;
+  position:relative; z-index:1;
+}
+
+section {
+  position: relative; z-index:1;
+  max-width: 1100px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 16px;
+}
+
+/* CHARACTER CARDS */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+.char-card {
+  background: rgba(255,255,255,0.22);
+  border: 1.5px solid rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 20px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+  backdrop-filter: blur(4px);
+}
+.char-card:hover { transform: translateY(-4px) scale(1.03); background: rgba(255,255,255,0.35); }
+.char-card.selected {
+  border-color: #c8ff00;
+  background: rgba(200,255,0,0.15);
+  box-shadow: 0 0 20px rgba(200,255,0,0.25);
+}
+.char-canvas-wrap {
+  position: relative;
+  width: 80px; height: 110px;
+}
+.char-canvas-wrap canvas { display:block; }
+.char-name {
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 15px;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.char-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* STATE PREVIEW */
+.states-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  justify-content: center;
+}
+.state-pill {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: rgba(255,255,255,0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* BLOCK GRID */
+.block-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.block-card {
+  background: rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.6);
+  border-radius: 16px;
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(4px);
+  transition: transform 0.15s;
+}
+.block-card:hover { transform: translateY(-3px); }
+.block-canvas { display:block; }
+.block-name {
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 16px;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.block-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.block-difficulty {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.15);
+  color: white;
+}
+.block-special {
+  font-size: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 3px 8px;
+  color: rgba(255,255,255,0.9);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+.block-power {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+}
+
+/* Score multiplier badge */
+.badge-x2 {
+  background: #FFD600;
+  color: #5D4037;
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+/* DIVIDER */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.25);
+  margin: 8px 0 24px;
+}
+
+/* SELECTED CHAR STATES SHOWCASE */
+.states-showcase {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 40px;
+  backdrop-filter: blur(4px);
+}
+.state-col { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.state-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.7);
+}
+</style>
+</head>
+<body>
+
+<canvas class="cloud-bg" id="cloud-canvas"></canvas>
+
+<h1>HOWL JUMP</h1>
+<div class="subtitle">Character & Block Showcase · Howl Studio 2026</div>
+
+<section>
+  <div class="section-label">05 Nhân vật — click để xem states</div>
+  <div class="divider"></div>
+  <div class="char-grid" id="char-grid"></div>
+</section>
+
+<section>
+  <div class="section-label">States preview — <span id="selected-char-name">Boy</span></div>
+  <div class="divider"></div>
+  <div class="states-showcase" id="states-showcase"></div>
+</section>
+
+<section>
+  <div class="section-label">08 Block types — độ khó & theme kết hợp</div>
+  <div class="divider"></div>
+  <div class="block-grid" id="block-grid"></div>
+</section>
+
+<script>
+// ══════════════════════════════════════════
+// CHARACTER DATA
+// ══════════════════════════════════════════
+const CHARACTERS = [
+  {
+    id: 'boy', name: 'Boy', tag: 'Default',
+    hair: '#5D4037', skin: '#FFCCBC', eye: '#1A1A1A',
+    shirt: '#42A5F5', shirtDark: '#1E88E5',
+    pants: '#1565C0', pantsDark: '#0D47A1',
+    shoe: '#212121', collar: '#FFFFFF',
+    logo: 'HW', logoColor: '#FFFFFF',
+    hasSkirt: false, hasMask: false, isRobot: false, isAstronaut: false,
+    blush: false,
+  },
+  {
+    id: 'girl', name: 'Girl', tag: 'Playful',
+    hair: '#6A1B9A', skin: '#FFCCBC', eye: '#880E4F',
+    shirt: '#EC407A', shirtDark: '#C2185B',
+    pants: '#F48FB1', pantsDark: '#EC407A',
+    shoe: '#AD1457', collar: '#FCE4EC',
+    logo: 'HW', logoColor: '#FFFFFF',
+    hasSkirt: true, hasMask: false, isRobot: false, isAstronaut: false,
+    blush: true,
+  },
+  {
+    id: 'robot', name: 'Robot', tag: 'Tech',
+    hair: '#37474F', skin: null, eye: '#00E5FF',
+    shirt: '#546E7A', shirtDark: '#37474F',
+    pants: '#455A64', pantsDark: '#263238',
+    shoe: '#263238', collar: '#78909C',
+    logo: 'AI', logoColor: '#00E5FF',
+    hasSkirt: false, hasMask: false, isRobot: true, isAstronaut: false,
+    blush: false, visor: '#00E5FF', glow: 'rgba(0,229,255,0.3)',
+  },
+  {
+    id: 'ninja', name: 'Ninja', tag: 'Stealth',
+    hair: '#000000', skin: '#212121', eye: '#FFFFFF',
+    shirt: '#1A1A1A', shirtDark: '#000000',
+    pants: '#1A1A1A', pantsDark: '#000000',
+    shoe: '#B71C1C', collar: '#B71C1C',
+    logo: '忍', logoColor: '#EF5350',
+    hasSkirt: false, hasMask: true, maskColor: '#B71C1C', isRobot: false, isAstronaut: false,
+    blush: false, belt: '#B71C1C',
+  },
+  {
+    id: 'astronaut', name: 'Astro', tag: 'Space',
+    hair: '#ECEFF1', skin: '#FFCCBC', eye: '#1A1A1A',
+    shirt: '#ECEFF1', shirtDark: '#CFD8DC',
+    pants: '#CFD8DC', pantsDark: '#B0BEC5',
+    shoe: '#78909C', collar: '#FFFFFF',
+    logo: '🚀', logoColor: '#F44336',
+    hasSkirt: false, hasMask: false, isRobot: false, isAstronaut: true,
+    helmetColor: '#ECEFF1', visorColor: '#FFA000', stripeColor: '#F44336',
+    blush: false,
+  },
+];
+
+// ══════════════════════════════════════════
+// BLOCK DATA
+// ══════════════════════════════════════════
+const BLOCKS = [
+  { id:'grass',     name:'Grass',      emoji:'🌿', top:'#7EC850', left:'#5A9E30', right:'#4A8220', diff:'Easy',    power:'0–40',  special:null,           scoreX:1, appear:'Score 0+' },
+  { id:'wood',      name:'Wood',       emoji:'🪵', top:'#A1887F', left:'#795548', right:'6D4C41',  diff:'Easy',    power:'20–55', special:null,           scoreX:1, appear:'Score 0+' },
+  { id:'stone',     name:'Stone',      emoji:'🪨', top:'#9E9E9E', left:'#757575', right:'#616161', diff:'Normal',  power:'30–60', special:null,           scoreX:1, appear:'Score 5+' },
+  { id:'ice',       name:'Ice',        emoji:'🧊', top:'#E1F5FE', left:'#81D4FA', right:'#4FC3F7', diff:'Normal',  power:'25–50', special:'Slippery',     scoreX:1, appear:'Score 5+' },
+  { id:'lava',      name:'Lava',       emoji:'🌋', top:'#FF7043', left:'#BF360C', right:'#8D2303', diff:'Hard',    power:'60–85', special:'Glow 🔥',       scoreX:1, appear:'Score 10+' },
+  { id:'cloud',     name:'Cloud',      emoji:'☁️', top:'#ECEFF1', left:'#CFD8DC', right:'#B0BEC5', diff:'Hard',    power:'40–70', special:'Bounce ×1.2',  scoreX:1, appear:'Score 10+' },
+  { id:'space',     name:'Space',      emoji:'⭐', top:'#1A237E', left:'#0D1259', right:'#070B3A', diff:'Expert',  power:'70–90', special:'Stars ✨',       scoreX:1, appear:'Score 20+' },
+  { id:'gold',      name:'Gold',       emoji:'💎', top:'#FFD600', left:'#F9A825', right:'#E65100', diff:'Legend',  power:'80–100',special:'Score ×2',      scoreX:2, appear:'Score 35+' },
+];
+
+const DIFF_COLORS = {
+  'Easy':   'rgba(100,200,100,0.35)',
+  'Normal': 'rgba(100,150,255,0.35)',
+  'Hard':   'rgba(255,150,50,0.35)',
+  'Expert': 'rgba(150,50,255,0.35)',
+  'Legend': 'rgba(255,210,0,0.4)',
+};
+
+// ══════════════════════════════════════════
+// DRAW CHARACTER
+// ══════════════════════════════════════════
+function drawChar(canvas, C, state, frame) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2;
+  let bob = 0;
+  if (state === 'idle') bob = Math.sin(frame * 0.07) * 2.5;
+
+  ctx.save();
+  ctx.translate(cx, H - 10);
+
+  if (state === 'crouch') ctx.scale(1.15, 0.72);
+  if (state === 'jump') {
+    const angle = ((frame % 30) / 30) * Math.PI * 2;
+    ctx.rotate(angle);
+  }
+  if (state === 'land') {
+    const t = Math.abs(Math.sin(frame * 0.3));
+    ctx.scale(1.05, 0.82 + t * 0.18);
+  }
+
+  const by = -bob;
+
+  // Shadow
+  ctx.beginPath();
+  ctx.ellipse(0, 0, state==='jump'?8:13, 3, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fill();
+
+  if (C.isRobot) {
+    // Glow
+    if (C.glow) {
+      ctx.shadowColor = C.visor;
+      ctx.shadowBlur = 10;
+    }
+    // Legs
+    ctx.fillStyle = C.pants;
+    ctx.fillRect(-10, by-22, 9, 10);
+    ctx.fillRect(1, by-22, 9, 10);
+    // Body
+    ctx.fillStyle = C.shirt;
+    ctx.fillRect(-11, by-40, 22, 20);
+    // Panel detail
+    ctx.fillStyle = C.shirtDark;
+    ctx.fillRect(-6, by-37, 12, 7);
+    // Logo
+    ctx.fillStyle = C.logoColor;
+    ctx.font = 'bold 7px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(C.logo, 0, by-33);
+    // Arms
+    ctx.fillStyle = C.collar;
+    ctx.fillRect(-16, by-38, 5, 14);
+    ctx.fillRect(11, by-38, 5, 14);
+    // Head (square robot)
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = C.hair;
+    ctx.fillRect(-11, by-58, 22, 20);
+    // Antenna
+    ctx.fillStyle = '#FF5722';
+    ctx.fillRect(-1, by-63, 3, 7);
+    ctx.beginPath();
+    ctx.arc(0, by-64, 3, 0, Math.PI*2);
+    ctx.fillStyle = '#FF5722';
+    ctx.fill();
+    // Visor
+    ctx.fillStyle = C.visor;
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(-8, by-52, 16, 7);
+    ctx.globalAlpha = 1;
+    // Visor shine
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillRect(-7, by-52, 5, 2);
+
+  } else if (C.isAstronaut) {
+    // Pack
+    ctx.fillStyle = '#B0BEC5';
+    ctx.fillRect(10, by-46, 7, 14);
+    // Legs
+    ctx.fillStyle = C.pants;
+    ctx.fillRect(-10, by-22, 9, 11);
+    ctx.fillRect(1, by-22, 9, 11);
+    ctx.fillStyle = C.pantsDark;
+    ctx.fillRect(-1, by-22, 2, 11);
+    // Boots
+    ctx.fillStyle = C.shoe;
+    ctx.fillRect(-11, by-11, 10, 6); ctx.fillRect(1, by-11, 10, 6);
+    // Body
+    ctx.fillStyle = C.shirt;
+    ctx.fillRect(-11, by-42, 22, 22);
+    // Stripe
+    ctx.fillStyle = C.stripeColor;
+    ctx.fillRect(-11, by-38, 4, 18);
+    // Logo
+    ctx.font = '9px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(C.logo, 2, by-27);
+    // Arms
+    ctx.fillStyle = C.shirt;
+    ctx.fillRect(-16, by-40, 5, 15);
+    ctx.fillRect(11, by-40, 5, 15);
+    // Helmet
+    ctx.fillStyle = C.helmetColor;
+    ctx.beginPath();
+    ctx.roundRect(-12, by-64, 24, 24, 8);
+    ctx.fill();
+    // Visor
+    ctx.fillStyle = C.visorColor;
+    ctx.globalAlpha = 0.75;
+    ctx.beginPath();
+    ctx.roundRect(-9, by-60, 18, 12, 4);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    // Visor shine
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillRect(-7, by-59, 5, 3);
+
+  } else {
+    // HUMAN base
+    // Shoes
+    ctx.fillStyle = C.shoe;
+    ctx.fillRect(-11, by-10, 10, 6); ctx.fillRect(1, by-10, 10, 6);
+
+    // Pants / Skirt
+    if (C.hasSkirt) {
+      ctx.fillStyle = C.pants;
+      ctx.beginPath();
+      ctx.moveTo(-13, by-12);
+      ctx.lineTo(13, by-12);
+      ctx.lineTo(15, by-26);
+      ctx.lineTo(-15, by-26);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = C.pants;
+      ctx.fillRect(-10, by-22, 9, 13);
+      ctx.fillRect(1, by-22, 9, 13);
+      ctx.fillStyle = C.pantsDark;
+      ctx.fillRect(-1, by-22, 2, 13);
+    }
+
+    // Belt
+    if (C.belt) {
+      ctx.fillStyle = C.belt;
+      ctx.fillRect(-11, by-26, 22, 3);
+    }
+
+    // Body
+    ctx.fillStyle = C.shirt;
+    ctx.fillRect(-11, by-44, 22, 20);
+    // Pocket
+    ctx.fillStyle = C.shirtDark;
+    ctx.fillRect(-7, by-40, 7, 5);
+    // Logo on chest
+    ctx.fillStyle = C.logoColor;
+    ctx.font = 'bold 6px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    if (C.logo === '忍') {
+      ctx.font = 'bold 8px serif';
+    }
+    ctx.fillText(C.logo, 4, by-30);
+
+    // Arms (skin)
+    ctx.fillStyle = C.skin || '#FFCCBC';
+    ctx.fillRect(-16, by-42, 5, 14);
+    ctx.fillRect(11, by-42, 5, 14);
+
+    // Collar
+    ctx.fillStyle = C.collar;
+    ctx.fillRect(-7, by-46, 14, 4);
+
+    // Mask (ninja)
+    if (C.hasMask) {
+      ctx.fillStyle = C.maskColor;
+      ctx.fillRect(-11, by-48, 22, 7);
+    }
+
+    // Face
+    ctx.fillStyle = C.skin || '#FFCCBC';
+    ctx.fillRect(-10, by-60, 20, 16);
+
+    // Blush
+    if (C.blush) {
+      ctx.beginPath();
+      ctx.arc(-6, by-48, 3, 0, Math.PI*2);
+      ctx.arc(6, by-48, 3, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,100,100,0.3)';
+      ctx.fill();
+    }
+
+    // Eyes
+    ctx.fillStyle = C.eye;
+    ctx.fillRect(-7, by-55, 3, 3);
+    ctx.fillRect(4, by-55, 3, 3);
+    // Eye shine
+    if (C.eye !== '#FFFFFF') {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillRect(-6, by-55, 1, 1);
+      ctx.fillRect(5, by-55, 1, 1);
+    }
+
+    // Hair
+    ctx.fillStyle = C.hair;
+    ctx.fillRect(-11, by-68, 22, 10);
+    // Hair sides (girl)
+    if (C.id === 'girl') {
+      ctx.fillRect(-14, by-60, 5, 18);
+      ctx.fillRect(10, by-60, 5, 18);
+    }
+    // Hair tuft
+    ctx.fillRect(-3, by-70, 6, 4);
+  }
+
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════
+// DRAW BLOCK
+// ══════════════════════════════════════════
+function drawBlock(canvas, B) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H * 0.45;
+  const w = 70, d = 35, h = 20, stacks = B.id === 'gold' ? 4 : B.id === 'stone' ? 3 : 2;
+  const totalH = h * stacks;
+
+  // Glow for special blocks
+  if (B.id === 'lava' || B.id === 'gold') {
+    ctx.shadowColor = B.id === 'gold' ? '#FFD600' : '#FF5722';
+    ctx.shadowBlur = 18;
+  }
+
+  // Draw stacks bottom-up
+  for (let s = stacks - 1; s >= 0; s--) {
+    const sy = cy + (totalH / 2) - (stacks - s) * h;
+
+    // LEFT face
+    ctx.beginPath();
+    ctx.moveTo(cx - w/2, sy + d/2);
+    ctx.lineTo(cx,       sy + d);
+    ctx.lineTo(cx,       sy + d + h);
+    ctx.lineTo(cx - w/2, sy + d/2 + h);
+    ctx.fillStyle = B.left;
+    ctx.fill();
+
+    // RIGHT face
+    ctx.beginPath();
+    ctx.moveTo(cx + w/2, sy + d/2);
+    ctx.lineTo(cx,       sy + d);
+    ctx.lineTo(cx,       sy + d + h);
+    ctx.lineTo(cx + w/2, sy + d/2 + h);
+    ctx.fillStyle = B.right;
+    ctx.fill();
+
+    // TOP face
+    ctx.beginPath();
+    ctx.moveTo(cx,       sy);
+    ctx.lineTo(cx + w/2, sy + d/2);
+    ctx.lineTo(cx,       sy + d);
+    ctx.lineTo(cx - w/2, sy + d/2);
+    ctx.fillStyle = B.top;
+    ctx.fill();
+
+    // Top details
+    if (B.id === 'grass' && s === 0) {
+      ctx.fillStyle = 'rgba(80,160,30,0.5)';
+      [[cx-12,sy+8],[cx,sy+12],[cx+10,sy+6]].forEach(([px,py]) => {
+        ctx.fillRect(px-2, py-1, 4, 2);
+      });
+    }
+    if (B.id === 'ice' && s === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.fillRect(cx - w/4, sy + d/4, 16, 4);
+    }
+    if (B.id === 'wood' && s === 0) {
+      ctx.strokeStyle = 'rgba(80,40,20,0.2)';
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - w/3 + i*8, sy + 6 + i*2);
+        ctx.lineTo(cx + w/4 + i*4, sy + d - 4 + i*2);
+        ctx.stroke();
+      }
+    }
+    if (B.id === 'lava' && s === 0) {
+      ctx.fillStyle = '#FFCA28';
+      [[cx-8,sy+8],[cx+6,sy+12],[cx-2,sy+5]].forEach(([px,py]) => {
+        ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2); ctx.fill();
+      });
+    }
+    if (B.id === 'space' && s === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      [[cx-10,sy+6],[cx+8,sy+10],[cx+2,sy+4],[cx-4,sy+13]].forEach(([px,py]) => {
+        ctx.beginPath(); ctx.arc(px,py,1,0,Math.PI*2); ctx.fill();
+      });
+    }
+    if (B.id === 'gold' && s === 0) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, sy+2); ctx.lineTo(cx+8, sy+d/2);
+      ctx.lineTo(cx, sy+d-2); ctx.lineTo(cx-8, sy+d/2);
+      ctx.closePath(); ctx.stroke();
+    }
+    if (B.id === 'cloud' && s === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(cx-10, sy+6, 7, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, sy+4, 9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+10, sy+7, 6, 0, Math.PI*2); ctx.fill();
+    }
+
+    ctx.shadowBlur = 0;
+
+    // Stack separation line
+    if (s < stacks - 1) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - w/2, sy + d/2 + h);
+      ctx.lineTo(cx,       sy + d + h);
+      ctx.lineTo(cx + w/2, sy + d/2 + h);
+      ctx.stroke();
+    }
+  }
+
+  // Emoji label
+  ctx.font = '14px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(B.emoji, cx, cy - 4);
+}
+
+// ══════════════════════════════════════════
+// CLOUD BG
+// ══════════════════════════════════════════
+const cloudCanvas = document.getElementById('cloud-canvas');
+cloudCanvas.width = window.innerWidth;
+cloudCanvas.height = window.innerHeight;
+const clouds = Array.from({length:8}, () => ({
+  x: Math.random() * window.innerWidth,
+  y: 60 + Math.random() * 300,
+  s: 0.6 + Math.random() * 0.8,
+}));
+const cloudCtx = cloudCanvas.getContext('2d');
+function drawCloudShape(ctx, x, y, s) {
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  [[0,0,22],[22,0,18],[44,4,16],[-18,4,16],[26,10,20]].forEach(([dx,dy,r]) => {
+    ctx.beginPath(); ctx.arc(x+dx*s, y+dy*s, r*s, 0, Math.PI*2); ctx.fill();
+  });
+}
+function animateClouds() {
+  cloudCtx.clearRect(0,0,cloudCanvas.width,cloudCanvas.height);
+  clouds.forEach(c => {
+    drawCloudShape(cloudCtx, c.x, c.y, c.s);
+    c.x -= 0.25 * c.s;
+    if (c.x + 80 * c.s < 0) c.x = cloudCanvas.width + 60;
+  });
+  requestAnimationFrame(animateClouds);
+}
+animateClouds();
+
+// ══════════════════════════════════════════
+// RENDER CHARACTERS
+// ══════════════════════════════════════════
+let selectedCharId = 'boy';
+let frame = 0;
+const charCanvases = {};
+const stateCanvases = {};
+
+function buildCharGrid() {
+  const grid = document.getElementById('char-grid');
+  CHARACTERS.forEach(C => {
+    const card = document.createElement('div');
+    card.className = 'char-card' + (C.id === selectedCharId ? ' selected' : '');
+    card.id = 'card-' + C.id;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'char-canvas-wrap';
+    const cv = document.createElement('canvas');
+    cv.width = 80; cv.height = 110;
+    charCanvases[C.id] = cv;
+    wrap.appendChild(cv);
+
+    const name = document.createElement('div');
+    name.className = 'char-name';
+    name.textContent = C.name;
+
+    const tag = document.createElement('div');
+    tag.className = 'char-tag';
+    tag.textContent = C.tag;
+
+    card.appendChild(wrap);
+    card.appendChild(name);
+    card.appendChild(tag);
+    card.addEventListener('click', () => selectChar(C.id));
+    grid.appendChild(card);
+  });
+}
+
+function selectChar(id) {
+  selectedCharId = id;
+  document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + id).classList.add('selected');
+  const C = CHARACTERS.find(c => c.id === id);
+  document.getElementById('selected-char-name').textContent = C.name;
+  buildStatesShowcase(C);
+}
+
+function buildStatesShowcase(C) {
+  const container = document.getElementById('states-showcase');
+  container.innerHTML = '';
+  const STATES = ['idle','crouch','jump','land'];
+  const LABELS = ['IDLE · bob','CROUCH · squat','JUMP · flip','LAND · bounce'];
+  STATES.forEach((state, i) => {
+    const col = document.createElement('div');
+    col.className = 'state-col';
+    const cv = document.createElement('canvas');
+    cv.width = 80; cv.height = 120;
+    stateCanvases[state] = cv;
+    const lbl = document.createElement('div');
+    lbl.className = 'state-label';
+    lbl.textContent = LABELS[i];
+    col.appendChild(cv);
+    col.appendChild(lbl);
+    container.appendChild(col);
+  });
+}
+
+function buildBlockGrid() {
+  const grid = document.getElementById('block-grid');
+  BLOCKS.forEach(B => {
+    const card = document.createElement('div');
+    card.className = 'block-card';
+
+    const cv = document.createElement('canvas');
+    cv.className = 'block-canvas';
+    cv.width = 160; cv.height = 120;
+    drawBlock(cv, B);
+
+    const name = document.createElement('div');
+    name.className = 'block-name';
+    name.textContent = B.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'block-meta';
+
+    const diff = document.createElement('span');
+    diff.className = 'block-difficulty';
+    diff.textContent = B.diff;
+    diff.style.background = DIFF_COLORS[B.diff] || 'rgba(0,0,0,0.15)';
+
+    meta.appendChild(diff);
+
+    if (B.special) {
+      const sp = document.createElement('span');
+      sp.className = 'block-special';
+      sp.textContent = B.special;
+      meta.appendChild(sp);
+    }
+    if (B.scoreX === 2) {
+      const badge = document.createElement('span');
+      badge.className = 'badge-x2';
+      badge.textContent = '×2 SCORE';
+      meta.appendChild(badge);
+    }
+
+    const power = document.createElement('div');
+    power.className = 'block-power';
+    power.textContent = `⚡ Power ${B.power}  ·  ${B.appear}`;
+
+    card.appendChild(cv);
+    card.appendChild(name);
+    card.appendChild(meta);
+    card.appendChild(power);
+    grid.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════
+// ANIMATION LOOP
+// ══════════════════════════════════════════
+function animate() {
+  frame++;
+  const C = CHARACTERS.find(c => c.id === selectedCharId);
+
+  // Animate character cards (all idle)
+  CHARACTERS.forEach(ch => {
+    const cv = charCanvases[ch.id];
+    if (cv) drawChar(cv, ch, 'idle', frame);
+  });
+
+  // Animate state canvases
+  const STATES = ['idle','crouch','jump','land'];
+  STATES.forEach(state => {
+    const cv = stateCanvases[state];
+    if (cv && C) drawChar(cv, C, state, frame);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildCharGrid();
+buildStatesShowcase(CHARACTERS[0]);
+buildBlockGrid();
+animate();
+</script>
+</body>
+</html>

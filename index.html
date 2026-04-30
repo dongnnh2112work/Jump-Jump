@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Howl Jump</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=Fredoka+One&family=Nunito:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <div id="brandText" class="brand">HOWL STUDIO</div>
+        <div class="top-actions">
+          <span id="cameraStatus" class="status-dot status-off"></span>
+          <button id="fullscreenBtn" class="ghost-btn" type="button">Fullscreen (F)</button>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <aside class="left-panel">
+          <div class="panel-title">Camera (Fallback Ready)</div>
+          <div class="camera-box">
+            <video id="cameraVideo" class="camera-video" autoplay playsinline muted></video>
+            <canvas id="skeletonCanvas" class="skeleton-canvas"></canvas>
+            <div id="cameraMessage" class="camera-message">Initializing camera...</div>
+          </div>
+
+          <div class="panel-title">Power</div>
+          <div class="power-row">
+            <div class="power-bar">
+              <div id="powerFill" class="power-fill"></div>
+              <span class="zone-marker marker-40"></span>
+              <span class="zone-marker marker-80"></span>
+            </div>
+            <span id="powerLabel" class="power-label"></span>
+          </div>
+
+          <div class="help-box">
+            <div><kbd>SPACE</kbd> hold and release jump</div>
+            <div><kbd>↓</kbd> crouch sim</div>
+            <div><kbd>↑</kbd> jump sim</div>
+            <div><kbd>R</kbd> restart</div>
+            <div><kbd>F</kbd> fullscreen</div>
+            <div><kbd>Ctrl+D</kbd> debug panel</div>
+          </div>
+        </aside>
+
+        <section id="gameStage" class="game-stage">
+          <canvas id="gameCanvas"></canvas>
+          <div id="floatingPower" class="floating-power hidden">
+            <div id="floatingPowerFill" class="floating-power-fill"></div>
+            <div id="floatingPowerLabel" class="floating-power-label">⚡0</div>
+          </div>
+        </section>
+
+        <aside class="right-panel">
+          <div class="score-title">SCORE</div>
+          <div id="scoreValue" class="score-value">0</div>
+          <div class="best-row">BEST: <span id="bestValue">0</span></div>
+          <div class="best-row">JUMPS: <span id="jumpCountValue">0</span></div>
+          <button id="restartBtn" class="ghost-btn" type="button">Retry (R)</button>
+        </aside>
+      </main>
+    </div>
+
+    <section id="debugPanel" class="debug-panel hidden">
+      <div class="debug-title">Debug</div>
+      <div class="debug-grid">
+        <label>State: <span id="debugState">IDLE</span></label>
+        <label>FPS: <span id="debugFps">0</span></label>
+        <label>Power: <span id="debugPower">0</span></label>
+        <label>Track Y: <span id="debugHipY">0</span></label>
+        <label style="grid-column:1/-1;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          Tracking mode:
+          <button id="btnTrackShoulder" class="track-mode-btn active" type="button">SHOULDER</button>
+          <button id="btnTrackHead"     class="track-mode-btn"        type="button">HEAD</button>
+          <button id="btnTrackHip"      class="track-mode-btn"        type="button">HIP</button>
+        </label>
+        <label>
+          squatThreshold
+          <input id="sliderSquat" type="range" min="3" max="60" step="1" value="8" />
+          <span id="sliderSquatValue">8</span>
+        </label>
+        <label>
+          jumpThreshold
+          <input id="sliderJump" type="range" min="2" max="40" step="1" value="6" />
+          <span id="sliderJumpValue">6</span>
+        </label>
+        <label>
+          powerMult
+          <input id="sliderPowerMult" type="range" min="0.5" max="3" step="0.1" value="1.2" />
+          <span id="sliderPowerMultValue">1.2</span>
+        </label>
+        <label>
+          cooldownMs
+          <input id="sliderCooldown" type="range" min="200" max="800" step="10" value="400" />
+          <span id="sliderCooldownValue">400</span>
+        </label>
+      </div>
+    </section>
+
+    <section id="tutorialOverlay" class="tutorial-overlay hidden" role="dialog" aria-live="polite">
+      <div class="tutorial-card">
+        <div class="tutorial-svg-wrap">
+          <svg viewBox="0 0 360 120" class="tutorial-svg" aria-hidden="true">
+            <g class="tutorial-frame frame-1">
+              <circle cx="60" cy="26" r="12" fill="#fff"></circle>
+              <rect x="50" y="40" width="20" height="40" rx="10" fill="#42A5F5"></rect>
+              <rect x="46" y="80" width="10" height="24" rx="5" fill="#1565C0"></rect>
+              <rect x="64" y="80" width="10" height="24" rx="5" fill="#1565C0"></rect>
+              <text x="108" y="66">Dung thang</text>
+            </g>
+            <g class="tutorial-frame frame-2">
+              <circle cx="180" cy="34" r="12" fill="#fff"></circle>
+              <rect x="170" y="46" width="20" height="30" rx="10" fill="#42A5F5"></rect>
+              <rect x="166" y="76" width="10" height="28" rx="5" fill="#1565C0"></rect>
+              <rect x="184" y="76" width="10" height="28" rx="5" fill="#1565C0"></rect>
+              <text x="220" y="66">Ngoi xuong</text>
+            </g>
+            <g class="tutorial-frame frame-3">
+              <circle cx="292" cy="20" r="12" fill="#fff"></circle>
+              <rect x="282" y="34" width="20" height="36" rx="10" fill="#42A5F5"></rect>
+              <rect x="278" y="70" width="10" height="24" rx="5" fill="#1565C0"></rect>
+              <rect x="296" y="70" width="10" height="24" rx="5" fill="#1565C0"></rect>
+              <path d="M292 104 L280 92 L288 92 L288 82 L296 82 L296 92 L304 92 Z" fill="#ffffff"></path>
+              <text x="220" y="106">Bat len de nhay</text>
+            </g>
+          </svg>
+        </div>
+        <div class="tutorial-title">TAP, HOLD AND RELEASE</div>
+        <div class="tutorial-subtitle">Tap vao man hinh de bo qua</div>
+      </div>
+    </section>
+
+    <section id="gameOverOverlay" class="game-over-overlay hidden" role="dialog" aria-live="polite">
+      <div class="game-over-card">
+        <div class="game-over-title">GAME OVER</div>
+        <div class="game-over-stats">
+          <div>Score: <span id="gameOverScore">0</span></div>
+          <div>Best: <span id="gameOverBest">0</span></div>
+        </div>
+        <div class="game-over-leader">
+          <div class="leader-title">Session Top 5</div>
+          <ol id="sessionTop5"></ol>
+        </div>
+        <div class="game-over-actions">
+          <button id="gameOverRetryBtn" class="ghost-btn" type="button">Retry</button>
+          <button id="gameOverHomeBtn" class="ghost-btn" type="button">Home</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="attractOverlay" class="attract-overlay hidden" role="dialog" aria-live="polite">
+      <div class="attract-card">
+        <div id="attractBrand" class="attract-brand">HOWL STUDIO</div>
+        <div class="attract-title">HOWL JUMP</div>
+        <div class="attract-subtitle">Tap/press any key to start</div>
+      </div>
+    </section>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
