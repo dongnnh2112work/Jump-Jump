@@ -497,22 +497,54 @@ function isoRoundRect(ctx, x, y, w, h, r) {
 }
 
 export function generatePlatforms(count = 48) {
-  const list = [];
-  let worldX = 0;
-  let worldY = 0;
+  const batch = generateBatch(count, 0, 0, 0, { x: 1, y: 0 });
+  if (batch[0]) {
+    batch[0].x = 0;
+    batch[0].y = 0;
+    batch[0].requiredPower = CFG.POWER.MIN;
+  }
+  return batch;
+}
+
+// Appends more platforms continuing from the end of an existing list.
+export function appendPlatforms(existing, count = 28) {
+  const last = existing[existing.length - 1];
+  const prev = existing.length >= 2 ? existing[existing.length - 2] : null;
+
+  // Infer cardinal heading from last two platforms
   let heading = { x: 1, y: 0 };
+  if (prev) {
+    const dx = last.x - prev.x;
+    const dy = last.y - prev.y;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      heading = { x: Math.sign(dx) || 1, y: 0 };
+    } else {
+      heading = { x: 0, y: Math.sign(dy) || 1 };
+    }
+  }
+
+  return generateBatch(count, last.id + 1, last.x, last.y, heading);
+}
+
+function generateBatch(count, startId, startX, startY, startHeading) {
+  const list = [];
+  let worldX = startX;
+  let worldY = startY;
+  let heading = { ...startHeading };
 
   for (let i = 0; i < count; i += 1) {
-    let gap = i === 0 ? 0 : 1.3 + Math.random() * 2.2;
+    const id = startId + i;
+    let gap = id === 0 ? 0 : 1.3 + Math.random() * 2.2;
     if (i > 1 && Math.random() < 0.58) {
       heading = rotate90(heading, Math.random() < 0.5 ? -1 : 1);
     }
     let nextX = worldX + heading.x * gap;
     let nextY = worldY + heading.y * gap;
 
-    if (i > 2) {
+    if (i > 0) {
       let tries = 0;
-      while (tries < 6 && isTooCloseToRecent(nextX, nextY, list, 6, 1.15)) {
+      const allPrev = list;
+      while (tries < 6 && isTooCloseToRecent(nextX, nextY, allPrev, 6, 1.15)) {
         gap += 0.32;
         nextX = worldX + heading.x * gap;
         nextY = worldY + heading.y * gap;
@@ -522,14 +554,14 @@ export function generatePlatforms(count = 48) {
     worldX = nextX;
     worldY = nextY;
 
-    const type = i === 0 ? "meadow" : selectBlockType(i);
+    const type = id === 0 ? "meadow" : selectBlockType(id);
     const typeDef = BLOCK_TYPES[type];
     const size = BLOCK_SIZES[type];
     const stack = size?.stacks ?? 1;
-    const requiredPower = i === 0 ? CFG.POWER.MIN : randInt(typeDef.requiredPower[0], typeDef.requiredPower[1]);
+    const requiredPower = id === 0 ? CFG.POWER.MIN : randInt(typeDef.requiredPower[0], typeDef.requiredPower[1]);
 
     list.push({
-      id: i,
+      id,
       x: worldX,
       y: worldY,
       z: 0,
@@ -541,12 +573,6 @@ export function generatePlatforms(count = 48) {
       requiredPower,
       passed: false,
     });
-  }
-
-  if (list[0]) {
-    list[0].x = 0;
-    list[0].y = 0;
-    list[0].requiredPower = CFG.POWER.MIN;
   }
 
   return list;

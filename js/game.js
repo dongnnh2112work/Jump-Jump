@@ -1,6 +1,6 @@
 import { CFG } from "./config.js";
 import { drawVoxelCharacter, getCharacterStateFromFlags } from "./character.js";
-import { drawIsoPlatform, generatePlatforms, worldToScreen } from "./platforms.js";
+import { drawIsoPlatform, generatePlatforms, appendPlatforms, worldToScreen } from "./platforms.js";
 import { pickRandomTheme } from "./theme.js";
 
 export function createGame(canvas, ui, handlers = {}) {
@@ -237,6 +237,13 @@ export function createGame(canvas, ui, handlers = {}) {
     updateDust(dt);
     state.fadedPlatforms = state.fadedPlatforms.filter((item) => performance.now() - item.startedAt < FADE_OUT_MS);
     state.successFx = state.successFx.filter((fx) => performance.now() - fx.startAt < 650);
+
+    // Auto-extend platform track when near the end
+    if (player.isGrounded && state.platforms.length - player.currentPlatformId < 14) {
+      const more = appendPlatforms(state.platforms, 28);
+      state.platforms.push(...more);
+    }
+
     if (!player.alive && !state.gameOverShown) {
       state.gameOverShown = true;
       state.sessionScores.push(player.score);

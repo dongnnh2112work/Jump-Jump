@@ -13,7 +13,7 @@ const soundFx = createSoundFx();
 const game = createGame(canvas, ui, {
   onJump: () => soundFx.playJump(),
   onLand: () => soundFx.playLand(),
-  onFail: () => soundFx.playFail(),
+  onFail: () => { soundFx.playFail(); soundFx.stopMusic(); },
   onPlayerAnchor: (x, y) => ui.setFloatingPowerPosition(x, y),
 });
 game.setCharacter(localStorage.getItem("howl_character") || "boy");
@@ -60,12 +60,14 @@ ui.showCharacterSelect((characterId) => {
 ui.refs.restartBtn.addEventListener("click", () => {
   markInputActivity();
   game.resetWorld();
+  soundFx.resumeMusic();
 });
 ui.refs.fullscreenBtn.addEventListener("click", () => toggleFullscreen());
 ui.bindGameOverActions(
   () => {
     markInputActivity();
     game.resetWorld();
+    soundFx.resumeMusic();
   },
   () => {
     markInputActivity();
@@ -178,12 +180,18 @@ function setupTutorialOverlay() {
   };
 }
 
+let musicStarted = false;
 function markInputActivity() {
   lastInputAt = performance.now();
+  if (!musicStarted) {
+    musicStarted = true;
+    soundFx.startMusic();
+  }
   if (!idleMode) return;
   idleMode = false;
   ui.setAttractVisible(false);
   game.setDemoMode(false);
+  soundFx.resumeMusic();
 }
 
 function updateIdleState(now) {
