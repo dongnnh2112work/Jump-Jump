@@ -1,6 +1,7 @@
 import { CFG } from "./config.js";
 import { drawVoxelCharacter, getCharacterStateFromFlags } from "./character.js";
 import { drawIsoPlatform, generatePlatforms, worldToScreen } from "./platforms.js";
+import { pickRandomTheme } from "./theme.js";
 
 export function createGame(canvas, ui, handlers = {}) {
   const ctx = canvas.getContext("2d");
@@ -41,6 +42,8 @@ export function createGame(canvas, ui, handlers = {}) {
     successFx: [],
     clouds: [],
     dustFx: [],
+    theme: pickRandomTheme(),
+    envParticles: [],
     jumpCount: 0,
     sessionScores: parseSessionScores(),
     gameOverShown: false,
@@ -84,7 +87,12 @@ export function createGame(canvas, ui, handlers = {}) {
     state.jumpCount = 0;
     state.fadedPlatforms = [];
     state.successFx = [];
-    state.clouds = createClouds(7, canvas.clientWidth || 1280, canvas.clientHeight || 720);
+    state.theme = pickRandomTheme();
+    syncThemeToCss(state.theme);
+    const tw = canvas.clientWidth || 1280;
+    const th = canvas.clientHeight || 720;
+    state.clouds = createClouds(7, tw, th);
+    state.envParticles = state.theme.createParticles(tw, th);
     state.dustFx = [];
     state.gameOverShown = false;
     state.combo = 0;
@@ -225,6 +233,7 @@ export function createGame(canvas, ui, handlers = {}) {
 
     updateCamera();
     updateClouds(dt);
+    updateEnvParticles(dt);
     updateDust(dt);
     state.fadedPlatforms = state.fadedPlatforms.filter((item) => performance.now() - item.startedAt < FADE_OUT_MS);
     state.successFx = state.successFx.filter((fx) => performance.now() - fx.startAt < 650);
@@ -282,11 +291,12 @@ export function createGame(canvas, ui, handlers = {}) {
   function drawBackground() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight);
-    grad.addColorStop(0, "#4FC8E8");
-    grad.addColorStop(1, "#A8E6F0");
+    grad.addColorStop(0, state.theme.sky.top);
+    grad.addColorStop(1, state.theme.sky.bottom);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     drawClouds();
+    drawEnvParticles();
   }
 
   function render() {
@@ -329,6 +339,7 @@ export function createGame(canvas, ui, handlers = {}) {
         pivotX: state.camera.pivotX,
         pivotY: state.camera.pivotY,
       });
+      const themedColors = state.theme.platformColors(p.type, p.colors);
       drawIsoPlatform(
         ctx,
         pos.x,
@@ -336,7 +347,7 @@ export function createGame(canvas, ui, handlers = {}) {
         (p.size?.w ?? CFG.ISO.TILE_WIDTH) * state.camera.zoom,
         (p.size?.d ?? CFG.ISO.TILE_DEPTH) * state.camera.zoom,
         (p.size?.h ?? CFG.ISO.TILE_HEIGHT) * p.stack * state.camera.zoom,
-        p.colors,
+        themedColors,
         p
       );
 
@@ -487,12 +498,13 @@ export function createGame(canvas, ui, handlers = {}) {
   }
 
   function drawClouds() {
+    const [cr, cg, cb] = state.theme.cloudRgb;
     for (const c of state.clouds) {
       const w = 70 * c.scale;
       const h = 30 * c.scale;
       ctx.save();
       ctx.translate(c.x, c.y);
-      ctx.fillStyle = `rgba(255,255,255,${c.alpha})`;
+      ctx.fillStyle = `rgba(${cr},${cg},${cb},${c.alpha})`;
       ctx.beginPath();
       ctx.arc(-w * 0.16, h * 0.6, h * 0.52, 0, Math.PI * 2);
       ctx.arc(w * 0.12, h * 0.5, h * 0.62, 0, Math.PI * 2);
@@ -538,6 +550,20 @@ export function createGame(canvas, ui, handlers = {}) {
       ctx.fill();
       ctx.restore();
     }
+  }
+
+  function updateEnvParticles(dt) {
+    state.theme.updateParticles(dt, state.envParticles, canvas.clientWidth || 1280, canvas.clientHeight || 720);
+  }
+
+  function drawEnvParticles() {
+    state.theme.drawParticles(ctx, state.envParticles);
+  }
+
+  function syncThemeToCss(theme) {
+    const root = document.documentElement;
+    root.style.setProperty('--sky-top', theme.sky.top);
+    root.style.setProperty('--sky-bottom', theme.sky.bottom);
   }
 
   return {
