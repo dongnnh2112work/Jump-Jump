@@ -351,9 +351,6 @@ export function createGame(canvas, ui, handlers = {}) {
         p
       );
 
-      ctx.fillStyle = "rgba(255,255,255,0.55)";
-      ctx.font = '700 10px "Nunito"';
-      ctx.fillText(`P${p.requiredPower}`, pos.x - 10, pos.y + CFG.ISO.TILE_DEPTH * 0.5);
       ctx.restore();
     }
 
