@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brand Mapping — Howl Jump</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:#0d0d1a; --surface:#161628; --surface2:#1e1e35;
+  --border:rgba(255,255,255,.10); --text:#e8e8f0; --muted:rgba(255,255,255,.45); --accent:#c8ff00;
+  /* exact game colors */
+  --sky-top:#4FC8E8; --sky-bot:#A8E6F0;
+  --grass-top:#7EC850; --grass-left:#5A9E30; --grass-right:#4A8220;
+  --stone-top:#9E9E9E; --stone-left:#757575; --stone-right:#616161;
+  --shirt:#42A5F5; --pants:#1565C0; --hair:#795548; --skin:#FFCCBC;
+  /* asset tag colors */
+  --tL:#ff6b6b; --tN:#ffa94d; --tC1:#74c0fc; --tC2:#69db7c;
+  --tF:#da77f2; --tT:#ffd43b; --tCH:#ff8787; --tBG:#66d9e8;
+  --radius:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;line-height:1.55}
+.page{max-width:1320px;margin:0 auto;padding:48px 28px 80px}
+.page-title{font-family:'Fredoka One',cursive;font-size:34px;color:var(--accent);margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:40px}
+
+/* ── Legend ── */
+.legend{display:flex;flex-wrap:wrap;gap:8px;padding:18px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:48px}
+.legend-title{width:100%;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(0,0,0,.3)}
+.td{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tL{border:2px solid var(--tL);color:var(--tL)} .tN{border:2px solid var(--tN);color:var(--tN)}
+.tC1{border:2px solid var(--tC1);color:var(--tC1)} .tC2{border:2px solid var(--tC2);color:var(--tC2)}
+.tF{border:2px solid var(--tF);color:var(--tF)} .tT{border:2px solid var(--tT);color:var(--tT)}
+.tCH{border:2px solid var(--tCH);color:var(--tCH)} .tBG{border:2px solid var(--tBG);color:var(--tBG)}
+
+/* ── Section ── */
+.section{margin-bottom:60px}
+.section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.section-num{font-family:'Fredoka One',cursive;font-size:12px;color:var(--accent);background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.25);border-radius:6px;padding:2px 10px;white-space:nowrap}
+.section-title{font-size:20px;font-weight:800}
+.section-desc{color:var(--muted);font-size:12px;margin-top:2px}
+
+/* ── Layout: mockup + point list ── */
+.screen-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+.mockup{position:relative;border-radius:var(--radius);overflow:visible;border:1px solid var(--border)}
+.mockup-inner{border-radius:var(--radius);overflow:hidden;position:relative}
+
+/* ── Pins ── */
+.pin{position:absolute;display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:800;color:#000;z-index:20;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.6);cursor:default;transition:transform .15s}
+.pin:hover{transform:translate(-50%,-50%) scale(1.3)}
+.pin.L{background:var(--tL)} .pin.N{background:var(--tN)} .pin.C1{background:var(--tC1)}
+.pin.C2{background:var(--tC2)} .pin.F{background:var(--tF)} .pin.T{background:var(--tT)}
+.pin.CH{background:var(--tCH)} .pin.BG{background:var(--tBG)}
+
+/* ── Point list ── */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pitem{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:start;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.pbadge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0;margin-top:1px}
+.plabel{font-weight:700;font-size:13px;margin-bottom:2px}
+.pdesc{color:var(--muted);font-size:11px;line-height:1.5}
+.passet{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-family:'DM Mono',monospace}
+
+/* ── Sky gradient base ── */
+.sky{background:linear-gradient(180deg,#4FC8E8 0%,#A8E6F0 100%)}
+
+/* ════════════════════════════════════
+   SCREEN 1: ATTRACT
+═════════════════════════════════════*/
+.attract-wrap{height:280px;position:relative}
+.attract-dim{position:absolute;inset:0;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center}
+.attract-card{text-align:center;padding:22px 38px;border-radius:18px;border:1px solid rgba(255,255,255,.42);background:rgba(10,10,20,.48);backdrop-filter:blur(4px)}
+.attract-brand-text{font-size:12px;letter-spacing:1px;opacity:.85;color:#fff;margin-bottom:4px}
+.attract-game-title{font-family:'Fredoka One',cursive;font-size:60px;line-height:1;color:#fff;margin-bottom:8px}
+.attract-cta{font-size:13px;color:rgba(255,255,255,.82)}
+
+/* ════════════════════════════════════
+   SCREEN 2: GAMEPLAY — 3-PANEL KIOSK
+═════════════════════════════════════*/
+.gameplay-wrap{position:relative}
+.topbar{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:rgba(255,255,255,.1);border-radius:var(--radius) var(--radius) 0 0}
+.topbar-brand{font-family:'Fredoka One',cursive;font-size:14px;color:#fff}
+.topbar-right{display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,.65)}
+.cam-dot{width:7px;height:7px;border-radius:50%;background:#69F0AE;box-shadow:0 0 6px #69F0AE}
+.panels{display:grid;grid-template-columns:160px 1fr 120px;gap:7px;padding:7px;min-height:320px}
+.panel{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:9px}
+.panel-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:1px;margin-bottom:5px}
+.cam-box{height:110px;background:rgba(0,0,0,.2);border-radius:7px;margin-bottom:8px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cam-msg{position:absolute;bottom:4px;left:4px;right:4px;font-size:8px;background:rgba(0,0,0,.55);border-radius:4px;padding:2px 5px;color:rgba(255,255,255,.7)}
+.pbar-wrap{height:13px;background:rgba(255,255,255,.2);border-radius:7px;overflow:hidden;position:relative;margin-bottom:6px}
+.pbar-fill{height:100%;width:55%;background:#66BB6A;border-radius:7px}
+.pbar-mark{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(255,255,255,.4)}
+.help-list{font-size:8px;color:rgba(255,255,255,.45);display:flex;flex-direction:column;gap:2px;margin-top:auto}
+kbd{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:3px;padding:0 3px;font-family:'DM Mono',monospace;font-size:8px}
+.canvas-panel{border-radius:9px;border:1px solid rgba(255,255,255,.2);overflow:hidden;position:relative}
+.score-val{font-family:'Fredoka One',cursive;font-size:48px;line-height:1;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);margin-bottom:4px}
+.score-sub{font-size:10px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:3px}
+.ghost-btn{display:inline-block;font-size:9px;font-weight:700;padding:5px 9px;border-radius:8px;border:2px solid rgba(255,255,255,.7);background:rgba(255,255,255,.14);color:#fff;margin-top:auto;text-align:center;cursor:default}
+
+/* ════════════════════════════════════
+   DETAIL SECTIONS
+═════════════════════════════════════*/
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:60px}
+.detail-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;position:relative}
+.detail-title{font-size:15px;font-weight:800;margin-bottom:4px}
+.detail-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.detail-svg{display:flex;justify-content:center;position:relative;padding:10px 0}
+
+/* Annotation labels in detail boxes */
+.ann{position:absolute;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap;pointer-events:none}
+.ann-line{position:absolute;background:rgba(255,255,255,.3);height:1px;pointer-events:none}
+
+/* ════════════════════════════════════
+   SCREEN 3: CHARACTER SELECT
+═════════════════════════════════════*/
+.charsel-wrap{height:250px;background:linear-gradient(160deg,rgba(60,0,100,.75) 0%,rgba(10,10,20,.92) 100%);display:flex;align-items:center;justify-content:center}
+.charsel-card{width:90%;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(10,10,20,.85);padding:14px 16px}
+.charsel-head{font-family:'Fredoka One',cursive;font-size:22px;text-align:center;margin-bottom:12px}
+.char-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
+.cslot{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:8px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.cslot.sel{border-color:#c8ff00;background:rgba(200,255,0,.07)}
+.cslot.brand{border:2px dashed rgba(255,80,80,.75);background:rgba(255,80,80,.07)}
+.cslot-name{font-size:9px;font-weight:700;color:rgba(255,255,255,.55)}
+.cslot.sel .cslot-name{color:#c8ff00}
+.cslot.brand .cslot-name{color:rgba(255,100,100,.9)}
+.charsel-desc{min-height:44px;padding:9px 12px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);margin-bottom:10px;font-size:10px;color:rgba(255,255,255,.55)}
+.charsel-desc strong{color:#c8ff00;font-size:11px}
+
+/* ════════════════════════════════════
+   SCREEN 4: TUTORIAL
+═════════════════════════════════════*/
+.tutorial-wrap{height:220px;position:relative}
+.tutorial-dim{position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center}
+.tutorial-card{width:280px;border-radius:14px;border:2px solid rgba(255,255,255,.62);background:rgba(255,255,255,.18);padding:16px;text-align:center;backdrop-filter:blur(2px)}
+.tut-svg-row{display:flex;gap:20px;justify-content:center;align-items:flex-end;margin-bottom:10px}
+.tut-fig{display:flex;flex-direction:column;align-items:center;gap:1px}
+.tut-head{width:13px;height:13px;border-radius:50%;background:#fff}
+.tut-body{width:11px;border-radius:3px;background:#42A5F5}
+.tut-legs{width:11px;height:12px;background:#1565C0;border-radius:2px}
+.tutorial-title{font-family:'Fredoka One',cursive;font-size:20px;color:#fff;margin-bottom:4px}
+.tutorial-sub{font-size:11px;color:rgba(255,255,255,.82)}
+
+/* ════════════════════════════════════
+   SCREEN 5: GAME OVER
+═════════════════════════════════════*/
+.gameover-wrap{height:260px;position:relative}
+.gameover-dim{position:absolute;inset:0;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center}
+.gameover-card{width:210px;border-radius:14px;background:rgba(10,10,20,.84);border:1px solid rgba(255,255,255,.22);padding:16px;text-align:center}
+.go-title{font-family:'Fredoka One',cursive;font-size:32px;color:#fff;margin-bottom:5px}
+.go-stats{font-size:13px;font-weight:700;color:rgba(255,255,255,.88);margin-bottom:9px}
+.go-board{text-align:left;font-size:10px;padding:7px 9px;background:rgba(255,255,255,.04);border-radius:7px;margin-bottom:8px;color:rgba(255,255,255,.6)}
+.go-board strong{display:block;font-size:10px;color:rgba(255,255,255,.7);margin-bottom:4px}
+.go-brand-msg{font-size:10px;font-style:italic;color:rgba(255,255,255,.45);margin-bottom:9px}
+.go-btns{display:flex;gap:7px;justify-content:center}
+.go-btn{font-size:10px;font-weight:700;padding:5px 12px;border-radius:9px;border:2px solid rgba(255,255,255,.65);background:rgba(255,255,255,.13);color:#fff}
+
+/* ── Summary table ── */
+.summary-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stbl{width:100%;border-collapse:collapse}
+.stbl th,.stbl td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:12px}
+.stbl th{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);background:var(--surface2)}
+.stbl tr:last-child td{border-bottom:none}
+.chip{display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;margin:1px;border:1.5px solid}
+.chip.L{border-color:var(--tL);color:var(--tL)} .chip.N{border-color:var(--tN);color:var(--tN)}
+.chip.C1{border-color:var(--tC1);color:var(--tC1)} .chip.C2{border-color:var(--tC2);color:var(--tC2)}
+.chip.F{border-color:var(--tF);color:var(--tF)} .chip.T{border-color:var(--tT);color:var(--tT)}
+.chip.CH{border-color:var(--tCH);color:var(--tCH)} .chip.BG{border-color:var(--tBG);color:var(--tBG)}
+
+/* ── Asset boxes ── */
+.aspec{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:20px}
+.abox{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px}
+.abox-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.abox-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.abox-title{font-weight:800;font-size:14px}
+.abox ul{padding-left:15px;color:var(--muted);font-size:12px}
+.abox ul li{margin-bottom:3px}
+
+.divider{border:none;border-top:1px solid var(--border);margin:52px 0}
+@media(max-width:900px){
+  .screen-wrap,.detail-grid{grid-template-columns:1fr}
+  .panels{grid-template-columns:1fr}
+  .panel:not(.canvas-panel){display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-title">Brand Mapping — Howl Jump</div>
+<div class="page-sub">Tài liệu nội bộ · Howl Studio · 05/2026 — Đánh dấu toàn bộ điểm có thể inject brand asset vào game</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Loại brand asset</div>
+  <div class="tag tL"><span class="td" style="background:var(--tL)"></span>Logo</div>
+  <div class="tag tN"><span class="td" style="background:var(--tN)"></span>Brand Name</div>
+  <div class="tag tC1"><span class="td" style="background:var(--tC1)"></span>Primary Color</div>
+  <div class="tag tC2"><span class="td" style="background:var(--tC2)"></span>Secondary Color</div>
+  <div class="tag tF"><span class="td" style="background:var(--tF)"></span>Font</div>
+  <div class="tag tT"><span class="td" style="background:var(--tT)"></span>Tagline / Copy</div>
+  <div class="tag tCH"><span class="td" style="background:var(--tCH)"></span>Character Skin</div>
+  <div class="tag tBG"><span class="td" style="background:var(--tBG)"></span>Sky / Background</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 01 — ATTRACT
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">SCREEN 01</span>
+    <div>
+      <div class="section-title">Attract Screen — màn hình chờ</div>
+      <div class="section-desc">Hiển thị khi không có người chơi — màn hình kiosk TV nhìn thấy nhiều nhất tại booth</div>
+    </div>
+  </div>
+  <div class="screen-wrap">
+    <div class="mockup">
+      <div class="mockup-inner sky attract-wrap">
+        <div class="attract-dim">
+          <div class="attract-card">
+            <div class="attract-brand-text">HOWL STUDIO</div>
+            <div class="attract-game-title">HOWL JUMP</div>
+            <div class="attract-cta">Tap / press any key to start</div>
+          </div>
+        </div>
+      </div>
+      <div class="pin N" style="top:37%;left:50%">N</div>
+      <div class="pin L" style="top:50%;left:50%">L</div>
+      <div class="pin T" style="top:64%;left:50%">T</div>
+      <div class="pin BG" style="top:15%;left:15%">BG</div>
+      <div class="pin C1" style="top:38%;left:82%">C1</div>
+      <div class="pin F"  style="top:52%;left:82%">F</div>
+    </div>
+    <div class="plist">
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tN)">N</div>
+        <div><div class="plabel">Brand Name</div><div class="pdesc">Text nhỏ phía trên tiêu đề — thay "HOWL STUDIO" bằng tên brand</div><span class="passet">brand_name · text</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tL)">L</div>
+        <div><div class="plabel">Logo</div><div class="pdesc">Đặt logo image trên hoặc thay tiêu đề "HOWL JUMP" bằng lockup logo + game name</div><span class="passet">logo_image · svg/png</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tT)">T</div>
+        <div><div class="plabel">Tagline / CTA</div><div class="pdesc">Dòng "Tap to start" — thay bằng tagline brand hoặc tên event/campaign</div><span class="passet">tagline · text ≤40 ký tự</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tBG)">BG</div>
+        <div><div class="plabel">Sky Background</div><div class="pdesc">Gradient bầu trời — 2 màu (top/bottom). Mặc định #4FC8E8 → #A8E6F0</div><span class="passet">sky_top + sky_bottom · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC1)">C1</div>
+        <div><div class="plabel">Primary Color — viền card</div><div class="pdesc">Màu border của card chứa tiêu đề</div><span class="passet">primary_color · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tF)">F</div>
+        <div><div class="plabel">Font</div><div class="pdesc">Display font cho tiêu đề lớn (Fredoka One). Có thể swap theo brand font</div><span class="passet">display_font</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 02 — GAMEPLAY (3-PANEL KIOSK)
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">SCREEN 02</span>
+    <div>
+      <div class="section-title">Gameplay — layout kiosk 3 cột</div>
+      <div class="section-desc">Màn hình chính khi đang chơi — hiển thị liên tục, nhiều touchpoint nhất. Primary: 1920×1080 kiosk</div>
+    </div>
+  </div>
+  <div class="screen-wrap">
+    <div class="mockup">
+      <div class="mockup-inner sky gameplay-wrap">
+        <!-- Top bar -->
+        <div class="topbar">
+          <span class="topbar-brand">HOWL STUDIO</span>
+          <div class="topbar-right">
+            <span class="cam-dot"></span>
+            <span>Camera live</span>
+            <span style="padding:2px 7px;border:1px solid rgba(255,255,255,.5);border-radius:5px">⛶ Fullscreen</span>
+          </div>
+        </div>
+        <!-- 3 panels -->
+        <div class="panels">
+          <!-- LEFT: camera + power -->
+          <div class="panel" style="display:flex;flex-direction:column">
+            <div class="panel-lbl">CAMERA (Fallback Ready)</div>
+            <div class="cam-box">
+              <!-- Person silhouette -->
+              <svg width="50" height="90" viewBox="0 0 50 90" style="opacity:.35">
+                <circle cx="25" cy="12" r="11" fill="#fff"/>
+                <rect x="14" y="25" width="22" height="32" rx="8" fill="#fff"/>
+                <rect x="10" y="57" width="12" height="26" rx="5" fill="#fff"/>
+                <rect x="28" y="57" width="12" height="26" rx="5" fill="#fff"/>
+              </svg>
+              <!-- Hip tracking dots (orange) -->
+              <div style="position:absolute;width:7px;height:7px;border-radius:50%;background:#FF6B35;box-shadow:0 0 6px #FF6B35;left:35%;top:65%"></div>
+              <div style="position:absolute;width:7px;height:7px;border-radius:50%;background:#FF6B35;box-shadow:0 0 6px #FF6B35;left:57%;top:65%"></div>
+              <div class="cam-msg">MediaPipe tracking active</div>
+            </div>
+            <div class="panel-lbl">POWER</div>
+            <div class="pbar-wrap">
+              <div class="pbar-fill"></div>
+              <div class="pbar-mark" style="left:40%"></div>
+              <div class="pbar-mark" style="left:80%"></div>
+            </div>
+            <div class="help-list">
+              <div><kbd>SPACE</kbd> hold &amp; release</div>
+              <div><kbd>↓</kbd> crouch &nbsp; <kbd>↑</kbd> jump</div>
+              <div><kbd>R</kbd> restart &nbsp; <kbd>F</kbd> fullscreen</div>
+            </div>
+          </div>
+
+          <!-- CENTER: game canvas with isometric SVG -->
+          <div class="canvas-panel">
+            <svg viewBox="0 0 500 310" style="width:100%;height:100%;display:block">
+              <!-- Sky already from parent bg -->
+              <!-- Clouds -->
+              <ellipse cx="80" cy="48" rx="42" ry="18" fill="rgba(255,255,255,.72)"/>
+              <ellipse cx="108" cy="40" rx="30" ry="15" fill="rgba(255,255,255,.72)"/>
+              <ellipse cx="58" cy="46" rx="26" ry="13" fill="rgba(255,255,255,.72)"/>
+              <ellipse cx="390" cy="35" rx="32" ry="13" fill="rgba(255,255,255,.52)"/>
+              <ellipse cx="415" cy="30" rx="22" ry="11" fill="rgba(255,255,255,.52)"/>
+              <ellipse cx="290" cy="58" rx="24" ry="10" fill="rgba(255,255,255,.55)"/>
+              <ellipse cx="310" cy="52" rx="16" ry="9" fill="rgba(255,255,255,.55)"/>
+
+              <!-- PLATFORM 1 (past / grass) sx=85,sy=220 hw=45,hd=22.5,h=12 x2 layers -->
+              <!-- layer top face -->
+              <polygon points="85,196 130,218.5 85,241 40,218.5" fill="#7EC850"/>
+              <polygon points="40,218.5 85,241 85,253 40,230.5" fill="#5A9E30"/>
+              <polygon points="130,218.5 85,241 85,253 130,230.5" fill="#4A8220"/>
+              <!-- layer 2 sides -->
+              <polygon points="40,230.5 85,253 85,265 40,242.5" fill="#4a8220"/>
+              <polygon points="130,230.5 85,253 85,265 130,242.5" fill="#3d6b18"/>
+
+              <!-- PLATFORM 2 (current / grass) sx=235,sy=155 -->
+              <polygon points="235,131 280,153.5 235,176 190,153.5" fill="#7EC850"/>
+              <polygon points="190,153.5 235,176 235,188 190,165.5" fill="#5A9E30"/>
+              <polygon points="280,153.5 235,176 235,188 280,165.5" fill="#4A8220"/>
+              <polygon points="190,165.5 235,188 235,200 190,177.5" fill="#4a8220"/>
+              <polygon points="280,165.5 235,188 235,200 280,177.5" fill="#3d6b18"/>
+
+              <!-- PLATFORM 3 (next / stone) sx=385,sy=90 -->
+              <polygon points="385,66 430,88.5 385,111 340,88.5" fill="#9E9E9E"/>
+              <polygon points="340,88.5 385,111 385,123 340,100.5" fill="#757575"/>
+              <polygon points="430,88.5 385,111 385,123 430,100.5" fill="#616161"/>
+              <polygon points="340,100.5 385,123 385,135 340,112.5" fill="#616161"/>
+              <polygon points="430,100.5 385,123 385,135 430,112.5" fill="#4e4e4e"/>
+
+              <!-- CHARACTER on Platform 2 (feet at y=131, 50px tall) -->
+              <!-- Shoes -->
+              <rect x="226" y="124" width="8" height="5" rx="1" fill="#212121"/>
+              <rect x="236" y="124" width="8" height="5" rx="1" fill="#212121"/>
+              <!-- Pants / Legs -->
+              <rect x="227" y="112" width="7" height="12" rx="1" fill="#1565C0"/>
+              <rect x="237" y="112" width="7" height="12" rx="1" fill="#1565C0"/>
+              <!-- Shirt / Body -->
+              <rect x="224" y="97" width="22" height="15" rx="2" fill="#42A5F5"/>
+              <!-- Collar -->
+              <rect x="229" y="97" width="12" height="4" rx="1" fill="rgba(255,255,255,.3)"/>
+              <!-- Small logo on shirt -->
+              <text x="235" y="109" font-size="5" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold">HW</text>
+              <!-- Face -->
+              <rect x="226" y="87" width="18" height="10" rx="1" fill="#FFCCBC"/>
+              <!-- Eyes -->
+              <circle cx="230" cy="91" r="1.5" fill="#1A1A1A"/>
+              <circle cx="238" cy="91" r="1.5" fill="#1A1A1A"/>
+              <!-- Hair -->
+              <rect x="225" y="78" width="20" height="10" rx="3" fill="#795548"/>
+            </svg>
+          </div>
+
+          <!-- RIGHT: score -->
+          <div class="panel" style="display:flex;flex-direction:column">
+            <div class="panel-lbl">SCORE</div>
+            <div class="score-val">142</div>
+            <div class="score-sub">BEST: <span style="color:#fff">200</span></div>
+            <div class="score-sub">JUMPS: <span style="color:#fff">18</span></div>
+            <div class="ghost-btn" style="margin-top:10px">Retry (R)</div>
+          </div>
+        </div>
+      </div>
+      <!-- Pins -->
+      <div class="pin N"  style="top:6%;left:12%">N</div>
+      <div class="pin L"  style="top:6%;left:25%">L</div>
+      <div class="pin BG" style="top:30%;left:50%">BG</div>
+      <div class="pin C1" style="top:72%;left:35%">C1</div>
+      <div class="pin C2" style="top:84%;left:28%">C2</div>
+      <div class="pin CH" style="top:50%;left:50%">CH</div>
+      <div class="pin F"  style="top:40%;left:91%">F</div>
+      <div class="pin C1" style="top:80%;left:91%">C1</div>
+    </div>
+    <div class="plist">
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tN)">N</div>
+        <div><div class="plabel">Brand Name — Top Bar</div><div class="pdesc">Góc trên trái, visible xuyên suốt game — thay bằng tên brand</div><span class="passet">brand_name · text</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tL)">L</div>
+        <div><div class="plabel">Logo — Top Bar</div><div class="pdesc">Đặt logo nhỏ bên cạnh hoặc thay brand name bằng logo image</div><span class="passet">logo_image · svg/png</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tBG)">BG</div>
+        <div><div class="plabel">Sky / Theme</div><div class="pdesc">Gradient bầu trời — 3 theme preset (Cloud Garden, Arctic Peak, Lantern Dusk) hoặc custom 2 màu hex</div><span class="passet">sky_top + sky_bottom · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC1)">C1</div>
+        <div><div class="plabel">Platform Top Face</div><div class="pdesc">Mặt trên của block — màu sáng nhất, dễ nhận diện nhất khi nhìn từ xa</div><span class="passet">primary_color · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC2)">C2</div>
+        <div><div class="plabel">Platform Side Faces</div><div class="pdesc">Mặt cạnh trái + phải của block — tông tối hơn primary tạo chiều sâu 3D</div><span class="passet">secondary_color · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tCH)">CH</div>
+        <div><div class="plabel">Character Skin</div><div class="pdesc">Màu áo, quần, giày + logo mini trên ngực — preset có sẵn hoặc custom brand character</div><span class="passet">character_preset · id</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tF)">F</div>
+        <div><div class="plabel">Score Font</div><div class="pdesc">Font hiển thị điểm số lớn — Fredoka One 64px, có thể swap</div><span class="passet">display_font</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DETAIL: BLOCK + CHARACTER BRANDING
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">DETAIL</span>
+    <div>
+      <div class="section-title">Block & Character — chi tiết vị trí branding</div>
+      <div class="section-desc">Zoom vào từng element để thấy rõ từng mặt/phần có thể đổi màu theo brand</div>
+    </div>
+  </div>
+  <div class="detail-grid">
+
+    <!-- BLOCK DETAIL -->
+    <div class="detail-box">
+      <div class="detail-title">Isometric Block (Platform)</div>
+      <div class="detail-sub">Mỗi block có 3 mặt — mỗi mặt có thể dùng tông màu khác nhau từ brand palette</div>
+      <div class="detail-svg" style="height:240px">
+        <svg viewBox="0 0 320 220" style="width:300px;height:200px">
+          <!-- 2-layer platform, large, centered -->
+          <!-- sx=160, sy=60, hw=80, hd=40, h=30 per layer -->
+
+          <!-- Layer 2 (top layer) top face -->
+          <polygon points="160,60 240,100 160,140 80,100" fill="#7EC850"/>
+          <!-- Layer 2 left side -->
+          <polygon points="80,100 160,140 160,170 80,130" fill="#5A9E30"/>
+          <!-- Layer 2 right side -->
+          <polygon points="240,100 160,140 160,170 240,130" fill="#4A8220"/>
+          <!-- Layer 1 left side -->
+          <polygon points="80,130 160,170 160,200 80,160" fill="#4a8220"/>
+          <!-- Layer 1 right side -->
+          <polygon points="240,130 160,170 160,200 240,160" fill="#3d6b18"/>
+
+          <!-- TOP FACE label -->
+          <text x="160" y="108" font-size="11" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold" opacity=".9">TOP FACE</text>
+          <!-- LEFT label -->
+          <text x="108" y="153" font-size="10" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold" opacity=".9">LEFT</text>
+          <!-- RIGHT label -->
+          <text x="212" y="153" font-size="10" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold" opacity=".9">RIGHT</text>
+        </svg>
+        <!-- Pins on faces -->
+        <div class="pin C1" style="position:absolute;top:44%;left:50%">C1</div>
+        <div class="pin C2" style="position:absolute;top:68%;left:32%">C2</div>
+        <div class="pin C2" style="position:absolute;top:68%;left:68%">C2</div>
+        <div class="pin L"  style="position:absolute;top:30%;left:50%" title="Logo/pattern on top face">L</div>
+      </div>
+      <!-- Annotations below -->
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tC1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">C1</div>
+          <div><span style="font-weight:700">Top face</span> <span style="color:var(--muted)">— màu sáng nhất, dùng primary color brand</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tC2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">C2</div>
+          <div><span style="font-weight:700">Left + Right face</span> <span style="color:var(--muted)">— tông tối hơn tạo hiệu ứng 3D (auto-darken hoặc brand secondary)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tL);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">L</div>
+          <div><span style="font-weight:700">Logo on top face</span> <span style="color:var(--muted)">— tuỳ chọn: tile nhỏ logo/icon lặp lại trên mặt trên của block</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER DETAIL -->
+    <div class="detail-box">
+      <div class="detail-title">Voxel Character</div>
+      <div class="detail-sub">Nhân vật pixel-art 4 phần — mỗi phần có thể đổi màu độc lập theo brand</div>
+      <div class="detail-svg" style="height:240px;justify-content:center;align-items:center">
+        <svg viewBox="0 0 260 240" style="width:280px;height:240px">
+          <!-- Large character, centered at x=130 -->
+          <!-- Shoes -->
+          <rect x="107" y="202" width="22" height="14" rx="3" fill="#212121"/>
+          <rect x="133" y="202" width="22" height="14" rx="3" fill="#212121"/>
+          <!-- Legs (pants) -->
+          <rect x="109" y="168" width="20" height="36" rx="4" fill="#1565C0"/>
+          <rect x="133" y="168" width="20" height="36" rx="4" fill="#1565C0"/>
+          <!-- Body (shirt) -->
+          <rect x="104" y="120" width="52" height="48" rx="6" fill="#42A5F5"/>
+          <!-- Collar detail -->
+          <rect x="118" y="120" width="24" height="10" rx="3" fill="rgba(255,255,255,.35)"/>
+          <!-- Logo on shirt -->
+          <rect x="120" y="136" width="20" height="20" rx="3" fill="rgba(255,255,255,.15)"/>
+          <text x="130" y="150" font-size="10" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold">HW</text>
+          <!-- Face -->
+          <rect x="108" y="86" width="44" height="34" rx="4" fill="#FFCCBC"/>
+          <!-- Eyes -->
+          <circle cx="120" cy="100" r="4" fill="#1A1A1A"/>
+          <circle cx="120" cy="100" r="2" fill="#fff"/>
+          <circle cx="140" cy="100" r="4" fill="#1A1A1A"/>
+          <circle cx="140" cy="100" r="2" fill="#fff"/>
+          <!-- Mouth -->
+          <path d="M122 110 Q130 117 138 110" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Hair -->
+          <rect x="106" y="60" width="48" height="30" rx="8" fill="#795548"/>
+          <!-- Hair tuft -->
+          <rect x="118" y="52" width="24" height="14" rx="6" fill="#795548"/>
+
+          <!-- Label lines + text -->
+          <!-- Hair label -->
+          <line x1="106" y1="75" x2="60" y2="75" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="54" y="78" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="end" font-family="Arial">HAIR</text>
+
+          <!-- Shirt label -->
+          <line x1="104" y1="144" x2="58" y2="144" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="52" y="141" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="end" font-family="Arial">SHIRT</text>
+          <text x="52" y="151" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="end" font-family="Arial">(logo)</text>
+
+          <!-- Pants label -->
+          <line x1="104" y1="185" x2="58" y2="185" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="52" y="188" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="end" font-family="Arial">PANTS</text>
+
+          <!-- Shoes label -->
+          <line x1="107" y1="209" x2="62" y2="209" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="56" y="212" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="end" font-family="Arial">SHOES</text>
+        </svg>
+        <!-- Pins -->
+        <div class="pin CH"  style="position:absolute;top:26%;left:67%" title="Shirt = Primary Color">CH</div>
+        <div class="pin C1"  style="position:absolute;top:53%;left:67%" title="Shirt color = Primary Color">C1</div>
+        <div class="pin C2"  style="position:absolute;top:74%;left:67%" title="Pants = Secondary Color">C2</div>
+        <div class="pin L"   style="position:absolute;top:62%;left:62%" title="Logo on chest">L</div>
+      </div>
+      <!-- Annotations below -->
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tC1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">C1</div>
+          <div><span style="font-weight:700">Shirt</span> <span style="color:var(--muted)">— primary color của brand (xanh dương mặc định)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tC2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">C2</div>
+          <div><span style="font-weight:700">Pants</span> <span style="color:var(--muted)">— secondary color (xanh tối mặc định)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tL);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">L</div>
+          <div><span style="font-weight:700">Logo mini trên ngực áo</span> <span style="color:var(--muted)">— text 2–3 ký tự hoặc icon SVG nhỏ</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--tCH);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0">CH</div>
+          <div><span style="font-weight:700">Brand Character preset</span> <span style="color:var(--muted)">— Nike AIR &amp; Coca-Cola FIZZY đã được làm sẵn, brand mới thêm 1 preset vào roster</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 03 — CHARACTER SELECT
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">SCREEN 03</span>
+    <div>
+      <div class="section-title">Character Select</div>
+      <div class="section-desc">Xuất hiện ngay sau Attract khi người chơi bắt đầu — cơ hội đặt brand character nổi bật</div>
+    </div>
+  </div>
+  <div class="screen-wrap">
+    <div class="mockup">
+      <div class="mockup-inner charsel-wrap">
+        <div class="charsel-card">
+          <div class="charsel-head">Choose Character</div>
+          <div class="char-grid">
+            <!-- Default characters -->
+            <div class="cslot sel">
+              <svg width="24" height="34" viewBox="0 0 24 34"><rect x="5" y="0" width="14" height="8" rx="3" fill="#795548"/><rect x="5" y="8" width="14" height="7" rx="1" fill="#FFCCBC"/><rect x="4" y="15" width="16" height="11" rx="2" fill="#42A5F5"/><rect x="4" y="26" width="7" height="8" rx="1" fill="#1565C0"/><rect x="13" y="26" width="7" height="8" rx="1" fill="#1565C0"/></svg>
+              <div class="cslot-name">Boy</div>
+            </div>
+            <div class="cslot">
+              <svg width="24" height="34" viewBox="0 0 24 34"><rect x="5" y="0" width="14" height="8" rx="3" fill="#6A1B9A"/><rect x="5" y="8" width="14" height="7" rx="1" fill="#FFCCBC"/><rect x="4" y="15" width="16" height="11" rx="2" fill="#EC407A"/><rect x="4" y="26" width="7" height="8" rx="1" fill="#F48FB1"/><rect x="13" y="26" width="7" height="8" rx="1" fill="#F48FB1"/></svg>
+              <div class="cslot-name">Girl</div>
+            </div>
+            <div class="cslot">
+              <svg width="24" height="34" viewBox="0 0 24 34"><rect x="5" y="0" width="14" height="8" rx="3" fill="#37474F"/><rect x="5" y="8" width="14" height="7" rx="1" fill="#78909C"/><rect x="4" y="15" width="16" height="11" rx="2" fill="#546E7A"/><rect x="4" y="26" width="7" height="8" rx="1" fill="#455A64"/><rect x="13" y="26" width="7" height="8" rx="1" fill="#455A64"/></svg>
+              <div class="cslot-name">Robot</div>
+            </div>
+            <div class="cslot">
+              <svg width="24" height="34" viewBox="0 0 24 34"><rect x="5" y="0" width="14" height="8" rx="3" fill="#000"/><rect x="5" y="8" width="14" height="7" rx="1" fill="#1A1A1A"/><rect x="4" y="15" width="16" height="11" rx="2" fill="#1A1A1A"/><rect x="4" y="26" width="7" height="8" rx="1" fill="#1A1A1A"/><rect x="13" y="26" width="7" height="8" rx="1" fill="#1A1A1A"/></svg>
+              <div class="cslot-name">Ninja</div>
+            </div>
+            <div class="cslot">
+              <svg width="24" height="34" viewBox="0 0 24 34"><rect x="5" y="0" width="14" height="8" rx="3" fill="#ECEFF1"/><rect x="5" y="8" width="14" height="7" rx="1" fill="#FFCCBC"/><rect x="4" y="15" width="16" height="11" rx="2" fill="#ECEFF1"/><rect x="4" y="26" width="7" height="8" rx="1" fill="#CFD8DC"/><rect x="13" y="26" width="7" height="8" rx="1" fill="#CFD8DC"/></svg>
+              <div class="cslot-name">Astro</div>
+            </div>
+            <!-- Brand slot (dashed) -->
+            <div class="cslot brand">
+              <svg width="24" height="34" viewBox="0 0 24 34" opacity=".6"><line x1="5" y1="5" x2="19" y2="29" stroke="rgba(255,80,80,.8)" stroke-width="1.5"/><line x1="19" y1="5" x2="5" y2="29" stroke="rgba(255,80,80,.8)" stroke-width="1.5"/><rect x="4" y="4" width="16" height="26" rx="3" stroke="rgba(255,80,80,.8)" stroke-width="1.2" fill="none"/></svg>
+              <div class="cslot-name" style="color:rgba(255,100,100,.9)">BRAND</div>
+            </div>
+          </div>
+          <div class="charsel-desc"><strong>Boy</strong> — The original Howl mascot. Quick on his feet and always ready for the next platform.</div>
+        </div>
+      </div>
+      <div class="pin CH"  style="top:80%;left:90%">CH</div>
+      <div class="pin C1"  style="top:50%;left:17%">C1</div>
+      <div class="pin F"   style="top:20%;left:50%">F</div>
+      <div class="pin L"   style="top:80%;left:82%" title="Brand character slot">L</div>
+    </div>
+    <div class="plist">
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tCH)">CH</div>
+        <div><div class="plabel">Brand Character Slot</div><div class="pdesc">Ô cuối cùng trong roster — thêm 1 nhân vật mặc brand colors. Đã có Nike AIR và Coca-Cola FIZZY làm mẫu</div><span class="passet">character_preset · new entry</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC1)">C1</div>
+        <div><div class="plabel">Selection Highlight</div><div class="pdesc">Viền và nền ô đang chọn — hiện là #c8ff00, thay bằng primary color của brand</div><span class="passet">primary_color · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tF)">F</div>
+        <div><div class="plabel">Title Font</div><div class="pdesc">"Choose Character" — Fredoka One, có thể swap</div><span class="passet">display_font</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tL)">L</div>
+        <div><div class="plabel">Brand Character Preview</div><div class="pdesc">Mini animated character trong ô card thể hiện màu brand + logo ngực áo</div><span class="passet">logo_mini · text ≤3 ký tự</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 04 — TUTORIAL
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">SCREEN 04</span>
+    <div>
+      <div class="section-title">Tutorial Overlay</div>
+      <div class="section-desc">Xuất hiện lần đầu — 3-frame animation hướng dẫn ngồi xuống → đứng lên → nhảy. Auto-hide 4 giây</div>
+    </div>
+  </div>
+  <div class="screen-wrap">
+    <div class="mockup">
+      <div class="mockup-inner sky tutorial-wrap">
+        <div class="tutorial-dim">
+          <div class="tutorial-card">
+            <div class="tut-svg-row">
+              <div class="tut-fig">
+                <div class="tut-head"></div>
+                <div class="tut-body" style="height:22px;margin-top:2px"></div>
+                <div class="tut-legs"></div>
+                <div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3px">ĐỨNG</div>
+              </div>
+              <div class="tut-fig">
+                <div class="tut-head" style="margin-top:8px"></div>
+                <div class="tut-body" style="height:14px;margin-top:2px"></div>
+                <div class="tut-legs"></div>
+                <div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3px">NGỒI</div>
+              </div>
+              <div class="tut-fig">
+                <div class="tut-head" style="margin-bottom:2px"></div>
+                <div class="tut-body" style="height:20px"></div>
+                <div class="tut-legs"></div>
+                <div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3px">BẬT</div>
+              </div>
+            </div>
+            <div class="tutorial-title">TAP, HOLD AND RELEASE</div>
+            <div class="tutorial-sub">Tap vào màn hình để bỏ qua</div>
+          </div>
+        </div>
+      </div>
+      <div class="pin F"   style="top:63%;left:50%">F</div>
+      <div class="pin T"   style="top:76%;left:50%">T</div>
+      <div class="pin C1"  style="top:40%;left:22%">C1</div>
+      <div class="pin BG"  style="top:15%;left:15%">BG</div>
+      <div class="pin CH"  style="top:47%;left:36%">CH</div>
+    </div>
+    <div class="plist">
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tF)">F</div>
+        <div><div class="plabel">Title Font</div><div class="pdesc">Fredoka One — tiêu đề "TAP, HOLD AND RELEASE", swap theo brand display font</div><span class="passet">display_font</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tT)">T</div>
+        <div><div class="plabel">Sub-text / Brand Message</div><div class="pdesc">Dòng phụ dưới tiêu đề — thay bằng tagline ngắn. VD: "Ngồi xuống, bật lên — Just Do It"</div><span class="passet">tagline · text</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC1)">C1</div>
+        <div><div class="plabel">Card Border</div><div class="pdesc">Viền card tutorial — primary color</div><span class="passet">primary_color · hex</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tCH)">CH</div>
+        <div><div class="plabel">Figure Color</div><div class="pdesc">Màu áo của hình minh họa 3 frame — theo brand character shirt color</div><span class="passet">primary_color · hex</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 05 — GAME OVER
+═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">SCREEN 05</span>
+    <div>
+      <div class="section-title">Game Over Screen</div>
+      <div class="section-desc">Kết thúc lượt chơi — người chơi dừng lại đọc điểm, cơ hội tốt để hiển thị brand message</div>
+    </div>
+  </div>
+  <div class="screen-wrap">
+    <div class="mockup">
+      <div class="mockup-inner sky gameover-wrap">
+        <div class="gameover-dim">
+          <div class="gameover-card">
+            <div class="go-title">GAME OVER</div>
+            <div class="go-stats">Score: 142 &nbsp;·&nbsp; Best: 200</div>
+            <div class="go-board">
+              <strong>Session Top 5</strong>
+              <div>1. 200</div><div>2. 142</div><div>3. 118</div>
+            </div>
+            <div class="go-brand-msg">"Just Do It" — Nike</div>
+            <div class="go-btns">
+              <div class="go-btn">Retry</div>
+              <div class="go-btn">Home</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pin L"  style="top:22%;left:50%">L</div>
+      <div class="pin F"  style="top:30%;left:50%">F</div>
+      <div class="pin T"  style="top:70%;left:50%">T</div>
+      <div class="pin C1" style="top:84%;left:50%">C1</div>
+      <div class="pin BG" style="top:12%;left:15%">BG</div>
+    </div>
+    <div class="plist">
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tL)">L</div>
+        <div><div class="plabel">Logo Watermark</div><div class="pdesc">Logo nhỏ đặt phía trên "GAME OVER" — in lại brand mỗi lần game kết thúc</div><span class="passet">logo_image · svg/png</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tF)">F</div>
+        <div><div class="plabel">GAME OVER Font</div><div class="pdesc">Fredoka One 34px — swap theo brand display font</div><span class="passet">display_font</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tT)">T</div>
+        <div><div class="plabel">Brand Message Slot</div><div class="pdesc">Dòng italic trước nút action — vị trí lý tưởng cho tagline. VD: "Just Do It — Nike"</div><span class="passet">tagline · text ≤50 ký tự</span></div>
+      </div>
+      <div class="pitem">
+        <div class="pbadge" style="background:var(--tC1)">C1</div>
+        <div><div class="plabel">Button Border</div><div class="pdesc">Viền nút Retry / Home — primary color brand</div><span class="passet">primary_color · hex</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ASSET CHECKLIST -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">ASSETS</span>
+    <div>
+      <div class="section-title">Brand Asset Checklist — cần cung cấp</div>
+    </div>
+  </div>
+  <div class="aspec">
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tL)"></div><div class="abox-title">Logo</div></div><ul><li>SVG hoặc PNG nền trong</li><li>Tối thiểu 200×200px</li><li>Full logo + icon-only (vuông)</li><li>Trên nền tối và nền sáng</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tN)"></div><div class="abox-title">Brand Name</div></div><ul><li>Tên chính thức (plain text)</li><li>Tên rút gọn nếu có</li><li>Tên game custom nếu muốn</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tC1)"></div><div class="abox-title">Primary Color</div></div><ul><li>Mã HEX chính xác</li><li>Dùng: block top, button border, selection ring, sky gradient</li><li>VD: Nike #111111, Coca-Cola #CC0000</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tC2)"></div><div class="abox-title">Secondary Color</div></div><ul><li>HEX phụ (thường tối hơn primary)</li><li>Dùng: block side faces, gradient sky 2</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tF)"></div><div class="abox-title">Font</div></div><ul><li>Display font (tiêu đề, score)</li><li>Body font (UI, hướng dẫn)</li><li>Google Fonts link hoặc .woff2</li><li>Optional — giữ Fredoka One + Nunito</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tT)"></div><div class="abox-title">Tagline / Copy</div></div><ul><li>Tagline ngắn ≤40 ký tự</li><li>CTA custom nếu có</li><li>Tên event / campaign</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tCH)"></div><div class="abox-title">Character Skin</div></div><ul><li>Chọn preset hoặc yêu cầu custom</li><li>Custom: màu áo, quần, giày</li><li>Logo ngực áo ≤3 ký tự hoặc SVG icon</li></ul></div>
+    <div class="abox"><div class="abox-head"><div class="abox-dot" style="background:var(--tBG)"></div><div class="abox-title">Background / Theme</div></div><ul><li>Chọn: Cloud Garden / Arctic Peak / Lantern Dusk</li><li>Hoặc custom 2 hex màu sky</li><li>Optional: ảnh nền attract screen</li></ul></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- TOUCHPOINT MATRIX -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">MATRIX</span>
+    <div>
+      <div class="section-title">Touchpoint Matrix</div>
+      <div class="section-desc">Asset × màn hình — để estimate scope khi nhận brief từ brand</div>
+    </div>
+  </div>
+  <div class="summary-wrap">
+    <table class="stbl">
+      <thead><tr>
+        <th>Asset</th><th>Attract</th><th>Gameplay</th><th>Block</th><th>Character</th><th>Char Select</th><th>Tutorial</th><th>Game Over</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span class="chip L">Logo</span></td><td>✓ card top</td><td>✓ top bar</td><td>✓ tile on top face</td><td>✓ chest icon</td><td>✓ mini preview</td><td>—</td><td>✓ watermark</td></tr>
+        <tr><td><span class="chip N">Brand Name</span></td><td>✓ text nhỏ</td><td>✓ top bar</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><span class="chip C1">Primary Color</span></td><td>✓ card border</td><td>✓ block top + btn</td><td>✓ top face</td><td>✓ áo shirt</td><td>✓ selection ring</td><td>✓ card border</td><td>✓ buttons</td></tr>
+        <tr><td><span class="chip C2">Secondary Color</span></td><td>✓ sky gradient</td><td>✓ block sides</td><td>✓ left+right face</td><td>✓ quần pants</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><span class="chip F">Font</span></td><td>✓ title</td><td>✓ score</td><td>—</td><td>—</td><td>✓ title</td><td>✓ title</td><td>✓ GAME OVER</td></tr>
+        <tr><td><span class="chip T">Tagline</span></td><td>✓ CTA text</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✓ subtitle</td><td>✓ message slot</td></tr>
+        <tr><td><span class="chip CH">Character</span></td><td>—</td><td>✓ in-game</td><td>—</td><td>✓ toàn bộ</td><td>✓ brand slot</td><td>✓ hình minh họa</td><td>—</td></tr>
+        <tr><td><span class="chip BG">Background</span></td><td>✓ full sky</td><td>✓ sky canvas</td><td>—</td><td>—</td><td>✓ overlay bg</td><td>✓ sky behind</td><td>✓ sky behind</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;margin-top:40px">
+  Howl Studio · Brand Mapping v2.0 · howl-jump · 2026 · Tài liệu nội bộ
+</div>
+
+</div>
+</body>
+</html>
